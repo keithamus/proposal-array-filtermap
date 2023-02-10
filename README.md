@@ -1,61 +1,72 @@
-# template-for-proposals
+# proposal-array-filterMap
 
-A repository template for ECMAScript proposals.
+A proposal to create a `filterMap` Array method that returns a new array containing each truthy value returned by the
+mapping function. Think of it like `.filter+.map`.
 
-## Before creating a proposal
+```js
+const accounts = [
+  { role: "admin", name: "Alice" },
+  { role: "admin", name: "Bob" },
+  { role: "user", name: "Carol" },
+  { role: "user", name: "Carlos" },
+  { role: "user", name: "Charlie" },
+]
 
-Please ensure the following:
-  1. You have read the [process document](https://tc39.github.io/process-document/)
-  1. You have reviewed the [existing proposals](https://github.com/tc39/proposals/)
-  1. You are aware that your proposal requires being a member of TC39, or locating a TC39 delegate to "champion" your proposal
+// Using .filter(...).map(...)
+const names = accounts.filter((a) => a.role === "admin").map((a) => a.name)
+// =>  ['Alice', 'Bob']
 
-## Create your proposal repo
+// Using .filterMap()
+const names = accounts.filterMap((a) => a.role === "admin" && a.name)
+// =>  ['Alice', 'Bob']
+```
 
-Follow these steps:
-  1. Click the green ["use this template"](https://github.com/tc39/template-for-proposals/generate) button in the repo header. (Note: Do not fork this repo in GitHub's web interface, as that will later prevent transfer into the TC39 organization)
-  1. Update the biblio to the latest version: `npm install --save-dev --save-exact @tc39/ecma262-biblio@latest`.
-  1. Go to your repo settings “Options” page, under “GitHub Pages”, and set the source to the **main branch** under the root (and click Save, if it does not autosave this setting)
-      1. check "Enforce HTTPS"
-      1. On "Options", under "Features", Ensure "Issues" is checked, and disable "Wiki", and "Projects" (unless you intend to use Projects)
-      1. Under "Merge button", check "automatically delete head branches"
-<!--
-  1. Avoid merge conflicts with build process output files by running:
-      ```sh
-      git config --local --add merge.output.driver true
-      git config --local --add merge.output.driver true
-      ```
-  1. Add a post-rewrite git hook to auto-rebuild the output on every commit:
-      ```sh
-      cp hooks/post-rewrite .git/hooks/post-rewrite
-      chmod +x .git/hooks/post-rewrite
-      ```
--->
-  3. ["How to write a good explainer"][explainer] explains how to make a good first impression.
+## Champions
 
-      > Each TC39 proposal should have a `README.md` file which explains the purpose
-      > of the proposal and its shape at a high level.
-      >
-      > ...
-      >
-      > The rest of this page can be used as a template ...
+- Keith Cirkel ([@keithamus](https://github.com/keithamus/))
 
-      Your explainer can point readers to the `index.html` generated from `spec.emu`
-      via markdown like
+## Status
 
-      ```markdown
-      You can browse the [ecmarkup output](https://ACCOUNT.github.io/PROJECT/)
-      or browse the [source](https://github.com/ACCOUNT/PROJECT/blob/HEAD/spec.emu).
-      ```
+Current [Stage](https://tc39.es/process-document/): 0
 
-      where *ACCOUNT* and *PROJECT* are the first two path elements in your project's Github URL.
-      For example, for github.com/**tc39**/**template-for-proposals**, *ACCOUNT* is "tc39"
-      and *PROJECT* is "template-for-proposals".
+## Motivation
 
+Using Array methods to compute new values while rejecting certain entries can currently be solved in 3 predominant ways:
 
-## Maintain your proposal repo
+- Use `.filter` and `.map`, invoking two iterations over the array and allocating two sets of arrays.
+- Use a for loop, creating an empty array and pushing into it conditionally for each iteration of the for loop.
+- Use some kind of reducer function, which can have a variety of different styles.
 
-  1. Make your changes to `spec.emu` (ecmarkup uses HTML syntax, but is not HTML, so I strongly suggest not naming it ".html")
-  1. Any commit that makes meaningful changes to the spec, should run `npm run build` and commit the resulting output.
-  1. Whenever you update `ecmarkup`, run `npm run build` and commit any changes that come from that dependency.
+```js
+const names = accounts.filter((a) => a.role === "admin").map((a) => a.name)
 
-  [explainer]: https://github.com/tc39/how-we-work/blob/HEAD/explainer.md
+const names = []
+for (const a of accounts) {
+  if (a.role === "admin") names.push(a.name)
+}
+
+const names = accounts.reduce((names, a) => {
+  if (a.role === "admin") names.push(a.name)
+  // Or
+  if (a.role === "admin") return names.concat(a.name)
+  // Or
+  if (a.role !== "admin") return [...names, a.name]
+
+  return names
+}, [])
+```
+
+These all feel like they come with some kind of compromise. The filter+map is probably the most readable, but comes at
+the cost of lowest performance among all three. `filterMap()` would solve the performance implications while also
+(arguably) improve readability.
+
+## Other languages
+
+- [Ruby has an `Enumerable#filter_map` method][ruby], which returns an Array containing each truthy value returned by
+  the block.
+
+## Polyfill
+
+- None as of yet.
+
+[ruby]: https://ruby-doc.org/core-2.7.0/Array.html#method-i-compact
