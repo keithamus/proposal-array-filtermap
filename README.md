@@ -60,7 +60,7 @@ const names = accounts.reduce((names, a) => {
 ```
 
 These all feel like they come with some kind of compromise. The filter+map is probably the most readable, but comes at
-the cost of lowest performance among all three. `filterMap()` would solve the performance implications while also
+the cost of lowest performance among all options. `filterMap()` would solve the performance implications while also
 (arguably) improving readability. `.flatMap()` has been [suggested](https://github.com/tc39/proposal-array-filtering/issues/12#issuecomment-592192544)
 as a reason why `.filterMap()` is not needed, but it is debatable which one is more readable.
 
