@@ -64,9 +64,11 @@ the cost of lowest performance among all three. `filterMap()` would solve the pe
 
 - [Ruby has an `Enumerable#filter_map` method][ruby], which returns an Array containing each truthy value returned by
   the block.
+- [Rust has `std::iter::FilterMap`][rust], which returns an iterator that uses `f` to both filter and map elements from iter.
 
 ## Polyfill
 
 - None as of yet.
 
-[ruby]: https://ruby-doc.org/core-2.7.0/Array.html#method-i-compact
+[ruby]: https://ruby-doc.org/3.2.1/Enumerable.html#method-i-filter_map
+[rust]: https://doc.rust-lang.org/std/iter/struct.FilterMap.html
